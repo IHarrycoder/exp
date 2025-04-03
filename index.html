@@ -1,0 +1,739 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rutherford Model Simulation</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600&display=swap" rel="stylesheet">
+    <style>
+        /* General Styles */
+        body {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            flex-direction: column;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            font-family: 'Poppins', Arial, sans-serif;
+            padding: 20px;
+            transition: background 0.5s ease;
+        }
+
+        /* Header Styles */
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+            width: 100%;
+        }
+
+        .header h1 {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+            text-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .header p {
+            font-size: 1.1rem;
+            max-width: 700px;
+            margin: 0 auto;
+            opacity: 0.9;
+        }
+
+        /* Progress Bar */
+        .progress-container {
+            width: 80%;
+            max-width: 800px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 10px;
+            margin: 20px 0;
+            padding: 5px;
+        }
+
+        .progress-bar {
+            height: 10px;
+            background: #ffcc00;
+            border-radius: 5px;
+            width: 0%;
+            transition: width 0.5s ease;
+        }
+
+        /* Link Styling */
+        #simulation-link {
+            color: #ffcc00;
+            text-decoration: none;
+            cursor: pointer;
+            margin-bottom: 20px;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+        }
+
+        #simulation-link:hover {
+            color: #ffdd44;
+            text-shadow: 0 0 15px rgba(255, 221, 68, 0.9);
+        }
+
+        /* Button Styling */
+        .button-container {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+            width: 100%;
+        }
+
+        #arrange-apparatus-button,
+        #show-table-button,
+        #show-marbles-button,
+        #show-model-button,
+        #move-to-apparatus-button,
+        #toggle-voice-button,
+        .theme-btn,
+        .info-tab {
+            padding: 12px 25px;
+            background-color: #ffcc00;
+            color: black;
+            border: none;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+            margin: 5px;
+        }
+
+        #arrange-apparatus-button:hover,
+        #show-table-button:hover,
+        #show-marbles-button:hover,
+        #show-model-button:hover,
+        #move-to-apparatus-button:hover,
+        #toggle-voice-button:hover,
+        .theme-btn:hover,
+        .info-tab:hover {
+            background-color: #ffdd44;
+            transform: translateY(-3px);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.3);
+        }
+
+        #arrange-apparatus-button,
+        #show-table-button,
+        #show-marbles-button,
+        #show-model-button,
+        #move-to-apparatus-button {
+            display: none;
+        }
+
+        #toggle-voice-button {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background-color: #4CAF50;
+            display: inline-block;
+            z-index: 1000;
+        }
+
+        #toggle-voice-button.voice-off {
+            background-color: #f44336;
+        }
+
+        .button-active {
+            background-color: #4CAF50 !important;
+            box-shadow: 0 0 15px #4CAF50 !important;
+        }
+
+        .highlight {
+            animation: pulse 1.5s infinite;
+        }
+
+        @keyframes pulse {
+            0% {
+                transform: scale(1);
+            }
+
+            50% {
+                transform: scale(1.05);
+            }
+
+            100% {
+                transform: scale(1);
+            }
+        }
+
+        /* Image Container Styling */
+        .image-container {
+            display: flex;
+            justify-content: space-between;
+            width: 90%;
+            max-width: 1200px;
+            margin-top: 30px;
+            padding: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+            flex-wrap: wrap;
+        }
+
+        #left-images {
+            display: flex;
+            flex-direction: column;
+            gap: 15px;
+            width: 48%;
+        }
+
+        #right-image {
+            width: 48%;
+        }
+
+        .image-container img {
+            width: 100%;
+            height: auto;
+            display: none;
+            border-radius: 10px;
+            box-shadow: 0 4px 6px rgba(0, 0, 0, 0.3);
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            cursor: zoom-in;
+        }
+
+        .image-container img:hover {
+            transform: scale(1.02);
+            box-shadow: 0 6px 10px rgba(0, 0, 0, 0.4);
+        }
+
+        .image-zoom.zoomed {
+            transform: scale(1.8);
+            z-index: 100;
+            position: relative;
+            box-shadow: 0 0 30px rgba(0, 0, 0, 0.5);
+        }
+
+        #model-image {
+            height: 400px;
+            object-fit: cover;
+        }
+
+        #table-image {
+            height: 180px;
+            object-fit: cover;
+        }
+
+        #marbles-image {
+            height: 200px;
+            object-fit: cover;
+        }
+
+        /* Animation for Fade-In */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+                transform: translateY(20px);
+            }
+
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        /* Direct Link Styling */
+        .direct-link {
+            margin-top: 30px;
+            text-align: center;
+            width: 100%;
+        }
+
+        .direct-link a {
+            color: #ffcc00;
+            text-decoration: none;
+            font-size: 18px;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            text-shadow: 0 0 10px rgba(255, 204, 0, 0.7);
+        }
+
+        .direct-link a:hover {
+            color: #ffdd44;
+            text-shadow: 0 0 15px rgba(255, 221, 68, 0.9);
+        }
+
+        /* Info Panel */
+        .info-panel {
+            width: 90%;
+            max-width: 1200px;
+            margin: 30px auto;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 20px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .info-tabs {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .info-tab {
+            background: rgba(255, 255, 255, 0.2);
+            color: white;
+            margin: 0 5px;
+        }
+
+        .info-tab.active {
+            background: #ffcc00;
+            color: black;
+        }
+
+        .info-content {
+            min-height: 150px;
+            position: relative;
+        }
+
+        .info-item {
+            display: none;
+            animation: fadeIn 0.5s ease;
+        }
+
+        .info-item.active {
+            display: block;
+        }
+
+        /* Theme Selector */
+        .theme-selector {
+            position: fixed;
+            top: 20px;
+            left: 20px;
+            z-index: 1000;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .theme-btn {
+            padding: 8px 15px;
+            font-size: 14px;
+            margin-bottom: 5px;
+        }
+
+        /* Feedback */
+        .feedback {
+            position: fixed;
+            bottom: -100px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 15px 30px;
+            border-radius: 30px;
+            color: white;
+            font-weight: bold;
+            opacity: 0;
+            transition: all 0.5s ease;
+            z-index: 1000;
+        }
+
+        .feedback.show {
+            bottom: 20px;
+            opacity: 1;
+        }
+
+        .feedback.success {
+            background: #4CAF50;
+        }
+
+        .feedback.error {
+            background: #f44336;
+        }
+
+        /* Accessibility */
+        :focus {
+            outline: 3px solid #ffcc00;
+            outline-offset: 3px;
+        }
+
+        @media (prefers-reduced-motion) {
+
+            .fade-in,
+            .progress-bar,
+            .image-container img {
+                animation: none !important;
+                transition: none !important;
+            }
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .image-container {
+                flex-direction: column;
+            }
+
+            #left-images,
+            #right-image {
+                width: 100%;
+            }
+
+            .button-container {
+                flex-direction: column;
+                align-items: center;
+            }
+
+            .button-container button {
+                width: 80%;
+                margin-bottom: 10px;
+            }
+
+            #model-image,
+            #table-image,
+            #marbles-image {
+                height: auto;
+            }
+
+            .theme-selector {
+                flex-direction: row;
+                top: 70px;
+                left: 50%;
+                transform: translateX(-50%);
+            }
+
+            .header h1 {
+                font-size: 1.8rem;
+            }
+
+            .header p {
+                font-size: 1rem;
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <div class="theme-selector">
+        <button class="theme-btn" onclick="changeTheme('default')">Default</button>
+        <button class="theme-btn" onclick="changeTheme('ocean')">Ocean</button>
+        <button class="theme-btn" onclick="changeTheme('sunset')">Sunset</button>
+        <button class="theme-btn" onclick="changeTheme('forest')">Forest</button>
+    </div>
+
+    <button id="toggle-voice-button">Enable Voice Instructions</button>
+
+    <div class="header">
+        <h1>Rutherford's Atomic Model Simulation</h1>
+        <p>Explore the famous gold foil experiment that led to the discovery of the atomic nucleus</p>
+    </div>
+
+    <div class="progress-container">
+        <div class="progress-bar"></div>
+    </div>
+
+    <p><span id="simulation-link">1) CHECK APPARATUS (Recommended)</span></p>
+
+    <div class="button-container">
+        <button id="arrange-apparatus-button">Arrange Apparatus</button>
+        <button id="show-table-button">Show Table</button>
+        <button id="show-marbles-button">Show Marbles</button>
+        <button id="show-model-button">Show Model</button>
+        <button id="move-to-apparatus-button" onclick="location.href='simulation.html'">Directly Move to
+            Apparatus</button>
+    </div>
+
+    <div class="image-container">
+        <div id="left-images">
+            <img id="table-image" src="table.png" alt="Table" class="fade-in">
+            <img id="marbles-image" src="bowlmarbles.png" alt="Marbles" class="fade-in">
+        </div>
+        <div id="right-image">
+            <img id="model-image" src="modell.png" alt="Model" class="fade-in">
+        </div>
+    </div>
+
+    <div class="info-panel">
+        <div class="info-tabs">
+            <button class="info-tab active" data-tab="theory">Theory</button>
+            <button class="info-tab" data-tab="procedure">Procedure</button>
+            <button class="info-tab" data-tab="results">Expected Results</button>
+        </div>
+        <div class="info-content">
+            <div class="info-item active" id="theory">
+                <h3>Rutherford's Gold Foil Experiment</h3>
+                <p>This experiment led to the discovery of the atomic nucleus. Rutherford directed alpha particles at a
+                    thin sheet of gold foil and observed their scattering pattern. Contrary to expectations, some
+                    particles were deflected at large angles, suggesting a small, dense nucleus at the atom's center.
+                </p>
+            </div>
+            <div class="info-item" id="procedure">
+                <h3>Experimental Procedure</h3>
+                <p>1. Set up your alpha particle emitter (represented by marbles in this simulation)<br>
+                    2. Arrange your gold foil target (the table represents this)<br>
+                    3. Position your detection screen (the model shows this setup)<br>
+                    4. Observe the scattering pattern of particles</p>
+            </div>
+            <div class="info-item" id="results">
+                <h3>What to Expect</h3>
+                <p>Most particles will pass straight through (as if the atom was mostly empty space), but some will
+                    deflect at various angles (indicating a dense nucleus). Very few particles will bounce straight
+                    back, which was the surprising result that led to the nuclear model of the atom.</p>
+            </div>
+        </div>
+    </div>
+
+    <div class="direct-link">
+        <a href="simulation.html">2) DIRECTLY GO TO RUTHERFORD MODEL SIMULATION</a>
+    </div>
+
+    <script>
+        // Voice Instructions Setup
+        const synth = window.speechSynthesis;
+        let voiceEnabled = false;
+        let currentUtterance = null;
+        let currentStep = 0;
+
+        const instructions = [
+            "Welcome to the Rutherford Model Simulation setup. Let's go through the steps to prepare the experiment.",
+            "First step: Click on 'Check Apparatus' to begin setting up your experiment.",
+            "Great! Now click 'Arrange Apparatus' to prepare your experimental setup.",
+            "Excellent. Now click 'Show Table' to display the table where the experiment will take place.",
+            "Well done. Next, click 'Show Marbles' to view the marbles that will represent alpha particles.",
+            "Almost there! Now click 'Show Model' to display the Rutherford atomic model.",
+            "Perfect setup! You're now ready to begin the experiment. Click 'Directly Move to Apparatus' to start.",
+            "Alternatively, you can click 'Directly Go to Rutherford Model Simulation' to skip setup and begin immediately."
+        ];
+
+        // Progress tracking
+        let progress = 0;
+        const progressBar = document.createElement('div');
+        progressBar.className = 'progress-bar';
+        document.querySelector('.progress-container').appendChild(progressBar);
+
+        function updateProgress(step) {
+            progress = (step / 6) * 100;
+            progressBar.style.width = `${progress}%`;
+            if (voiceEnabled) {
+                speak(instructions[step]);
+            }
+        }
+
+        function speak(text) {
+            if (synth && voiceEnabled) {
+                synth.cancel(); // Cancel any ongoing speech
+                currentUtterance = new SpeechSynthesisUtterance(text);
+                synth.speak(currentUtterance);
+            }
+        }
+
+        // Toggle voice button functionality
+        const toggleVoiceButton = document.getElementById('toggle-voice-button');
+        toggleVoiceButton.addEventListener('click', function () {
+            voiceEnabled = !voiceEnabled;
+            if (voiceEnabled) {
+                toggleVoiceButton.textContent = "Disable Voice Instructions";
+                toggleVoiceButton.classList.remove('voice-off');
+                toggleVoiceButton.classList.add('fade-in');
+                currentStep = 0; // Reset to first instruction
+                updateProgress(0); // Start instructions
+                showFeedback("Voice instructions enabled", true);
+            } else {
+                toggleVoiceButton.textContent = "Enable Voice Instructions";
+                toggleVoiceButton.classList.add('voice-off');
+                synth.cancel(); // Stop any ongoing speech
+                showFeedback("Voice instructions disabled", false);
+            }
+        });
+
+        // Theme management
+        const themes = {
+            "default": ["#1e3c72", "#2a5298"],
+            "ocean": ["#0f2027", "#203a43", "#2c5364"],
+            "sunset": ["#ff7e5f", "#feb47b"],
+            "forest": ["#1a2a6c", "#b21f1f", "#fdbb2d"]
+        };
+
+        function changeTheme(theme) {
+            document.body.style.background = `linear-gradient(135deg, ${themes[theme].join(',')})`;
+            showFeedback(`Theme changed to ${theme}`, true);
+        }
+
+        // Info tabs functionality
+        const infoTabs = document.querySelectorAll('.info-tab');
+        infoTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabId = tab.getAttribute('data-tab');
+                infoTabs.forEach(t => t.classList.remove('active'));
+                tab.classList.add('active');
+
+                document.querySelectorAll('.info-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+                document.getElementById(tabId).classList.add('active');
+
+                if (voiceEnabled) {
+                    speak(`Now showing ${tab.textContent} information`);
+                }
+            });
+        });
+
+        // Feedback system
+        function showFeedback(message, isSuccess) {
+            const feedback = document.createElement('div');
+            feedback.className = `feedback ${isSuccess ? 'success' : 'error'}`;
+            feedback.textContent = message;
+            document.body.appendChild(feedback);
+
+            setTimeout(() => {
+                feedback.classList.add('show');
+                setTimeout(() => {
+                    feedback.classList.remove('show');
+                    setTimeout(() => feedback.remove(), 500);
+                }, 3000);
+            }, 100);
+        }
+
+        // Image zoom functionality
+        const images = document.querySelectorAll('.image-container img');
+        images.forEach(img => {
+            img.addEventListener('click', function () {
+                this.classList.toggle('zoomed');
+                if (!this.classList.contains('zoomed')) {
+                    setTimeout(() => {
+                        this.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+                    }, 300);
+                }
+            });
+        });
+
+        // Voice commands
+        const voiceCommands = {
+            "start": () => simulationLink.click(),
+            "arrange": () => arrangeApparatusButton.click(),
+            "table": () => showTableButton.click(),
+            "marbles": () => showMarblesButton.click(),
+            "model": () => showModelButton.click(),
+            "begin": () => moveToApparatusButton.click(),
+            "theory": () => document.querySelector('[data-tab="theory"]').click(),
+            "procedure": () => document.querySelector('[data-tab="procedure"]').click(),
+            "results": () => document.querySelector('[data-tab="results"]').click()
+        };
+
+        function setupVoiceRecognition() {
+            if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                const Recognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                const recognition = new Recognition();
+                recognition.continuous = true;
+                recognition.interimResults = true;
+
+                recognition.onresult = (event) => {
+                    const transcript = event.results[event.results.length - 1][0].transcript.toLowerCase();
+                    for (const [command, action] of Object.entries(voiceCommands)) {
+                        if (transcript.includes(command)) {
+                            action();
+                            showFeedback(`Voice command executed: ${command}`, true);
+                            break;
+                        }
+                    }
+                };
+
+                recognition.start();
+            }
+        }
+
+        // Button hover instructions
+        function setupHoverInstructions(button, instruction) {
+            button.addEventListener('mouseenter', function () {
+                if (voiceEnabled) {
+                    speak(instruction);
+                }
+            });
+        }
+
+        // Main functionality
+        const simulationLink = document.getElementById('simulation-link');
+        const arrangeApparatusButton = document.getElementById('arrange-apparatus-button');
+        const showTableButton = document.getElementById('show-table-button');
+        const showMarblesButton = document.getElementById('show-marbles-button');
+        const showModelButton = document.getElementById('show-model-button');
+        const moveToApparatusButton = document.getElementById('move-to-apparatus-button');
+        const tableImage = document.getElementById('table-image');
+        const marblesImage = document.getElementById('marbles-image');
+        const modelImage = document.getElementById('model-image');
+        const directLink = document.querySelector('.direct-link a');
+
+        // Original functionality with added voice guidance
+        simulationLink.addEventListener('click', function () {
+            arrangeApparatusButton.style.display = 'inline-block';
+            arrangeApparatusButton.classList.add('fade-in');
+            updateProgress(1);
+        });
+
+        arrangeApparatusButton.addEventListener('click', function () {
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            showTableButton.style.display = 'inline-block';
+            showTableButton.classList.add('fade-in');
+            updateProgress(2);
+        });
+
+        showTableButton.addEventListener('click', function () {
+            tableImage.style.display = 'block';
+            showMarblesButton.style.display = 'inline-block';
+            showMarblesButton.classList.add('fade-in');
+            updateProgress(3);
+        });
+
+        showMarblesButton.addEventListener('click', function () {
+            marblesImage.style.display = 'block';
+            showModelButton.style.display = 'inline-block';
+            showModelButton.classList.add('fade-in');
+            updateProgress(4);
+        });
+
+        showModelButton.addEventListener('click', function () {
+            modelImage.style.display = 'block';
+            moveToApparatusButton.style.display = 'inline-block';
+            moveToApparatusButton.classList.add('fade-in');
+            updateProgress(5);
+        });
+
+        moveToApparatusButton.addEventListener('click', function () {
+            updateProgress(6);
+        });
+
+        directLink.addEventListener('click', function () {
+            if (voiceEnabled) {
+                speak("Taking you directly to the Rutherford Model Simulation.");
+            }
+        });
+
+        // Setup hover instructions
+        setupHoverInstructions(simulationLink, "Click this to begin checking your apparatus.");
+        setupHoverInstructions(arrangeApparatusButton, "Click to arrange your experimental apparatus.");
+        setupHoverInstructions(showTableButton, "Click to display the experiment table.");
+        setupHoverInstructions(showMarblesButton, "Click to show the marbles representing alpha particles.");
+        setupHoverInstructions(showModelButton, "Click to display the Rutherford atomic model.");
+        setupHoverInstructions(moveToApparatusButton, "Click to begin the simulation with your prepared setup.");
+        setupHoverInstructions(directLink, "Click to skip setup and go directly to the simulation.");
+
+        // Preload images
+        function preloadImages() {
+            const images = ['table.png', 'bowlmarbles.png', 'modell.png'];
+            images.forEach(img => {
+                const image = new Image();
+                image.src = img;
+            });
+        }
+        window.addEventListener('load', preloadImages);
+
+        // Initialize voice recognition if enabled
+        if (voiceEnabled) {
+            setupVoiceRecognition();
+        }
+    </script>
+</body>
+
+</html>
